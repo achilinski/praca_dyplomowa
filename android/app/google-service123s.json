@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "949361682359",
+    "project_id": "testktorysflutconf",
+    "storage_bucket": "testktorysflutconf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:949361682359:android:e19c501eda7d4387b06a32",
+        "android_client_info": {
+          "package_name": "com.example.praca"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0pus4ohE0g4UJb-y8qah2ydIz5GyLWoc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
