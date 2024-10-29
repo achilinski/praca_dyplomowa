@@ -6,19 +6,23 @@ import 'package:praca/screens/qr_code_scanner.dart';
 
 
 class EnterCodePage extends StatefulWidget {
+  final String? code; // Make code parameter optional
+  EnterCodePage({this.code});
   @override
   _EnterCodePageState createState() => _EnterCodePageState();
 }
 
 class _EnterCodePageState extends State<EnterCodePage> {
-  final TextEditingController _controller = TextEditingController();
+  final TextEditingController _codeController = TextEditingController();
   final ApiService _apiService = ApiService();
   String? _responseMessage;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scanQRCode());
+    if (widget.code != null) {
+      _codeController.text = widget.code!; // Prefill with QR code if available
+    }
   }
 
   Future<void> callApi(String code) async {
@@ -51,7 +55,7 @@ class _EnterCodePageState extends State<EnterCodePage> {
     );
 
     if (scannedCode != null) {
-      _controller.text = scannedCode;
+      _codeController.text = scannedCode;
       await callApi(scannedCode);
     }
   }
@@ -66,15 +70,19 @@ class _EnterCodePageState extends State<EnterCodePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
-              controller: _controller,
-              decoration: InputDecoration(
-                labelText: 'Enter a number (code)',
+                controller: _codeController,
+                decoration: InputDecoration(
+                  labelText: 'Truck QR Code or Manual Entry',
+                  suffixIcon: IconButton(
+                    icon: Icon(Icons.qr_code_scanner),
+                    onPressed: _scanQRCode, // Open QR scanner if needed
+                  ),
+                ),
               ),
-            ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
-                final code = _controller.text;
+                final code = _codeController.text;
                 if (code.isNotEmpty) {
                   await callApi(code);
                 }

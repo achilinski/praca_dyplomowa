@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:praca/screens/enter_code_page.dart';
+import 'package:praca/screens/stop_work_screen.dart';
 
-class QRScannerScreen extends StatefulWidget {
+class QRScannerStopScreen extends StatefulWidget {
   @override
-  _QRScannerScreenState createState() => _QRScannerScreenState();
+  _QRScannerStopScreenState createState() => _QRScannerStopScreenState();
 }
 
-class _QRScannerScreenState extends State<QRScannerScreen> {
+class _QRScannerStopScreenState extends State<QRScannerStopScreen> {
   final MobileScannerController _controller = MobileScannerController(); // Controller to manage the scanner
   bool _isScanned = false; // Track if a code has been scanned
 
@@ -30,7 +30,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => EnterCodePage(code: code),
+                    builder: (context) => StopWorkScreen(code: code),
                   ),
                 );
               }
