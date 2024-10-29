@@ -1,12 +1,14 @@
-import 'dart:convert';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:praca/api_handler.dart';
 import 'package:praca/main.dart';
-
+import 'package:praca/screens/qr_code_scanner_stop.dart';
 
 class StopWorkScreen extends StatefulWidget {
+  final String? code; // Make code parameter optional
+
+  StopWorkScreen({this.code});
+
   @override
   _StopWorkScreenState createState() => _StopWorkScreenState();
 }
@@ -14,12 +16,20 @@ class StopWorkScreen extends StatefulWidget {
 class _StopWorkScreenState extends State<StopWorkScreen> {
   final TextEditingController _codeController = TextEditingController();
   final TextEditingController _milageController = TextEditingController();
-  final ApiService _apiService = ApiService(); // Initialize the API service
+  final ApiService _apiService = ApiService();
   String? _responseMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.code != null) {
+      _codeController.text = widget.code!; // Prefill with QR code if available
+    }
+  }
 
   Future<void> callApi(String code, String milage) async {
     User? user = FirebaseAuth.instance.currentUser;
-    final email = user?.email; // Get the email of the currently logged in user
+    final email = user?.email;
 
     if (email == null) {
       setState(() {
@@ -34,10 +44,6 @@ class _StopWorkScreenState extends State<StopWorkScreen> {
         setState(() {
           _responseMessage = 'Work stopped';
         });
-      } else if (response.statusCode == 200) {
-        setState(() {
-          _responseMessage = jsonDecode(response.body)['message']; // Customize as per API response
-        });
       } else {
         setState(() {
           _responseMessage = 'Error: ${response.statusCode}';
@@ -50,10 +56,23 @@ class _StopWorkScreenState extends State<StopWorkScreen> {
     }
   }
 
+  Future<void> _scanQRCode() async {
+    final scannedCode = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => QRScannerStopScreen()),
+    );
+
+    if (scannedCode != null) {
+      setState(() {
+        _codeController.text = scannedCode; // Update the code field with scanned data
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Enter Code')),
+      appBar: AppBar(title: Text('Stop Work')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -62,30 +81,32 @@ class _StopWorkScreenState extends State<StopWorkScreen> {
             TextField(
               controller: _codeController,
               decoration: InputDecoration(
-                labelText: 'Enter a number (code)',
+                labelText: 'Truck QR Code or Manual Entry',
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.qr_code_scanner),
+                  onPressed: _scanQRCode, // Open QR scanner if needed
+                ),
               ),
             ),
             TextField(
               controller: _milageController,
-              decoration: InputDecoration(
-                labelText: 'Enter milage'),
-              ),
+              decoration: InputDecoration(labelText: 'Enter mileage'),
+            ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
                 final code = _codeController.text;
                 final milage = _milageController.text;
-                if (code.isNotEmpty) {
+                if (code.isNotEmpty && milage.isNotEmpty) {
                   await callApi(code, milage);
                 }
-                // Navigate if work started successfully
+
                 if (_responseMessage == 'Work stopped') {
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(builder: (context) => HomePage()),
                     ModalRoute.withName('/'),
-                  ).then((value) => setState(() {
-                  }));;
+                  );
                 }
               },
               child: Text('Submit'),
@@ -98,5 +119,4 @@ class _StopWorkScreenState extends State<StopWorkScreen> {
       ),
     );
   }
-
 }
