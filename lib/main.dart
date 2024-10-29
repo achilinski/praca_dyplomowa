@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:praca/api_handler.dart';
-import 'package:praca/screens/qr_scanner_screen.dart';
+import 'package:praca/screens/enter_code_page.dart';
 import 'package:praca/screens/stop_work_screen.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';

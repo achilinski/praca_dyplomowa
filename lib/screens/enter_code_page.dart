@@ -1,10 +1,9 @@
-import 'dart:convert';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:praca/api_handler.dart';
 import 'package:praca/main.dart';
- // Import the API service
+import 'package:praca/screens/qr_code_scanner.dart';
+
 
 class EnterCodePage extends StatefulWidget {
   @override
@@ -13,13 +12,18 @@ class EnterCodePage extends StatefulWidget {
 
 class _EnterCodePageState extends State<EnterCodePage> {
   final TextEditingController _controller = TextEditingController();
-  final ApiService _apiService = ApiService(); // Initialize the API service
+  final ApiService _apiService = ApiService();
   String? _responseMessage;
 
-  // Function to call the API using the service
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scanQRCode());
+  }
+
   Future<void> callApi(String code) async {
     User? user = FirebaseAuth.instance.currentUser;
-    final email = user?.email; // Get the email of the currently logged in user
+    final email = user?.email;
 
     if (email == null) {
       setState(() {
@@ -30,23 +34,25 @@ class _EnterCodePageState extends State<EnterCodePage> {
 
     try {
       final response = await _apiService.startWorkShift(email, code);
-      if (response.statusCode == 201) {
-        setState(() {
-          _responseMessage = 'Work started';
-        });
-      } else if (response.statusCode == 200) {
-        setState(() {
-          _responseMessage = jsonDecode(response.body)['message']; // Customize as per API response
-        });
-      } else {
-        setState(() {
-          _responseMessage = 'Error: ${response.statusCode}';
-        });
-      }
+      setState(() {
+        _responseMessage = response.statusCode == 201 ? 'Work started' : 'Error: ${response.statusCode}';
+      });
     } catch (e) {
       setState(() {
         _responseMessage = 'Failed to connect to API';
       });
+    }
+  }
+
+  Future<void> _scanQRCode() async {
+    final scannedCode = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => QRScannerScreen()),
+    );
+
+    if (scannedCode != null) {
+      _controller.text = scannedCode;
+      await callApi(scannedCode);
     }
   }
 
