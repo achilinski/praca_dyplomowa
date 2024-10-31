@@ -85,8 +85,8 @@ class ApiService {
     return response;
   }
 
-  Future<double> getUserTotalStats(String username) async {
-    final url = Uri.parse('$baseUrl/api/shift/total/');
+  Future<double> getUserMonthStats(String username) async {
+    final url = Uri.parse('$baseUrl/api/shift/month/');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -96,7 +96,21 @@ class ApiService {
     // Decode the JSON response and extract the double value
     List<dynamic> responseData = jsonDecode(response.body);
     double responseTime = responseData[0] as double;
-    print(responseTime);
     return responseTime;
-}
+  }
+
+  Future<double> getUserTodayStats(String username) async {
+    final url = Uri.parse('$baseUrl/api/shift/today/');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'username': username}),
+    );
+
+    // Decode the JSON response and extract the double value
+    List<dynamic> responseData = jsonDecode(response.body);
+    double responseTime = double.parse(responseData[0]);
+    return responseTime;
+  }
+
 }

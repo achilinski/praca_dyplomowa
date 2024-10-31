@@ -13,7 +13,6 @@ Future<void> main() async {
   runApp(MyApp());
 }
 
-
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -36,7 +35,8 @@ class _HomePageState extends State<HomePage> {
   User? _user;
   bool _isWorking = false;
   String? _username;
-  double _time = 0;
+  double _totalHours = 0;
+  double _todayHours = 0;
 
   @override
   void initState() {
@@ -62,7 +62,7 @@ class _HomePageState extends State<HomePage> {
     User? user = FirebaseAuth.instance.currentUser;
     _username = user?.email;
 
-    if(_username != null){
+    if (_username != null) {
       bool workingStatus = await ApiService().isWorking(_username!);
       setState(() {
         _isWorking = workingStatus;
@@ -74,16 +74,16 @@ class _HomePageState extends State<HomePage> {
     User? user = FirebaseAuth.instance.currentUser;
     _username = user?.email;
 
-    if(_username != null){
-      double _timefetch = await ApiService().getUserTotalStats(_username!);
+    if (_username != null) {
+      _totalHours = await ApiService().getUserMonthStats(_username!);
+      _todayHours = await ApiService().getUserTodayStats(_username!);
+
       setState(() {
-        _time = _timefetch;
+        _totalHours = _totalHours;
+        _todayHours = _todayHours;
       });
     }
-
-
   }
-  
 
   void _signOut() async {
     await FirebaseAuth.instance.signOut();
@@ -135,26 +135,55 @@ class _HomePageState extends State<HomePage> {
               },
             ),
             if (_user != null)
-            ListTile(
-              title: Text(_isWorking ? 'Stop work' : 'Start work'),
-              onTap: () async {
-                if (_isWorking)  {
-                  await Navigator.push(context, MaterialPageRoute(builder: (context) => StopWorkScreen()));
-                } else {
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => EnterCodePage()),
-                  );
-                }
-                await _fetchworkingStatus();
-              },
-            ),
+              ListTile(
+                title: Text(_isWorking ? 'Stop work' : 'Start work'),
+                onTap: () async {
+                  if (_isWorking) {
+                    await Navigator.push(
+                        context, MaterialPageRoute(builder: (context) => StopWorkScreen()));
+                  } else {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => EnterCodePage()),
+                    );
+                  }
+                  await _fetchworkingStatus();
+                },
+              ),
           ],
         ),
       ),
       body: Center(
-        child: Text(
-          _time != null ? 'You have worked for $_time' : _user != null ? 'You are logged in as ${_user!.email}' : 'Please sign in or register.',
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Text(
+                    '$_totalHours hours',
+                    style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Today: $_todayHours hours',
+                    style: TextStyle(fontSize: 18, color: Colors.grey[700]),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Center(
+                child: Text(
+                  _user != null
+                      ? 'You are logged in as ${_user!.email}'
+                      : 'Please sign in or register.',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
