@@ -36,6 +36,7 @@ class _HomePageState extends State<HomePage> {
   User? _user;
   bool _isWorking = false;
   String? _username;
+  double _time = 0;
 
   @override
   void initState() {
@@ -47,6 +48,7 @@ class _HomePageState extends State<HomePage> {
       });
     });
     _fetchworkingStatus();
+    _fetchUserStats();
   }
 
   @override
@@ -66,6 +68,20 @@ class _HomePageState extends State<HomePage> {
         _isWorking = workingStatus;
       });
     }
+  }
+
+  Future<void> _fetchUserStats() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    _username = user?.email;
+
+    if(_username != null){
+      double _timefetch = await ApiService().getUserTotalStats(_username!);
+      setState(() {
+        _time = _timefetch;
+      });
+    }
+
+
   }
   
 
@@ -138,7 +154,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Center(
         child: Text(
-          _user != null ? 'You are logged in as ${_user!.email}' : 'Please sign in or register.',
+          _time != null ? 'You have worked for $_time' : _user != null ? 'You are logged in as ${_user!.email}' : 'Please sign in or register.',
         ),
       ),
     );

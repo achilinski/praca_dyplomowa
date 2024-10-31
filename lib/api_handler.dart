@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  final String baseUrl = 'http://192.168.0.151:8000/'; // Replace with your Django API base URL
+  final String baseUrl = 'http://192.168.191.195:8000/'; // Replace with your Django API base URL
 
   // Function to start a work shift
   Future<http.Response> startWorkShift(String username, String qrCode) async {
@@ -84,4 +84,19 @@ class ApiService {
     final response = await http.get(url);
     return response;
   }
+
+  Future<double> getUserTotalStats(String username) async {
+    final url = Uri.parse('$baseUrl/api/shift/total/');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'username': username}),
+    );
+
+    // Decode the JSON response and extract the double value
+    List<dynamic> responseData = jsonDecode(response.body);
+    double responseTime = responseData[0] as double;
+    print(responseTime);
+    return responseTime;
+}
 }
