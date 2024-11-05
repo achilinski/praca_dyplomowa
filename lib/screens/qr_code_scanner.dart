@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:praca/screens/enter_code_page.dart';
+import 'package:praca/screens/work_page.dart';
 
 class QRScannerScreen extends StatefulWidget {
   @override

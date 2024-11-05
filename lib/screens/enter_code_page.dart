@@ -5,7 +5,9 @@ import 'package:praca/main.dart';
 import 'package:praca/screens/qr_code_scanner.dart';
 
 
-class EnterCodePage extends StatefulWidget {
+
+
+class EnterCodePage extends StatefulWidget{
   final String? code; // Make code parameter optional
   EnterCodePage({this.code});
   @override
@@ -15,7 +17,9 @@ class EnterCodePage extends StatefulWidget {
 class _EnterCodePageState extends State<EnterCodePage> {
   final TextEditingController _codeController = TextEditingController();
   final ApiService _apiService = ApiService();
+  User? _user = FirebaseAuth.instance.currentUser;
   String? _responseMessage;
+  String? _username;
 
   @override
   void initState() {
@@ -23,11 +27,11 @@ class _EnterCodePageState extends State<EnterCodePage> {
     if (widget.code != null) {
       _codeController.text = widget.code!; // Prefill with QR code if available
     }
+    _username = _user?.email;
   }
 
   Future<void> callApi(String code) async {
-    User? user = FirebaseAuth.instance.currentUser;
-    final email = user?.email;
+    final email = _user?.email;
 
     if (email == null) {
       setState(() {
@@ -63,12 +67,12 @@ class _EnterCodePageState extends State<EnterCodePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Enter Code')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
+            SizedBox(height: 30),
             TextField(
                 controller: _codeController,
                 decoration: InputDecoration(
