@@ -147,6 +147,23 @@ class ApiService {
     }
     return false;
   }
+
+  Future<List<double>> getGpsByName(String name) async {
+    final url = Uri.parse('$baseUrl/api/gps/get-name/');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'name': name}),
+    );
+    if (response.statusCode == 200) {
+      final responseBody = jsonDecode(response.body);
+      print(responseBody);
+      double lat = responseBody[0];
+      double long = responseBody[1];
+      return [lat, long];
+    }
+    return [1.0,2.0];
+  }
     
 
 }

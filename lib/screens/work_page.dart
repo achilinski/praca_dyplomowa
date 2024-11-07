@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:praca/api_handler.dart';
 import 'package:praca/main.dart';
 import 'package:praca/screens/enter_code_page.dart';
@@ -177,6 +178,12 @@ class _WorkPageState extends State<WorkPage> {
                   child: Text(_isBreak ? 'Stop Break' : 'Take Break'),),
               ],
               ),
+              SizedBox(height: 10,),
+              Expanded(
+              child: GoogleMap(
+                initialCameraPosition: CameraPosition(target: LatLng(20.0, 20.0)),
+              ),
+            ),
           ],
         ),
       ),
