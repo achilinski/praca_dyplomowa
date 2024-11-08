@@ -168,7 +168,7 @@ class ApiService {
 
   Future<Map<String, LatLng>> getAllGpsPoints() async {
     final url = Uri.parse('$baseUrl/api/gps/get-all/');
-    final response = await http.post(
+    final response = await http.get(
       url,
       headers: {'Content-Type': 'application/json'},
     );

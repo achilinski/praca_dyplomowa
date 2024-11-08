@@ -3,11 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:praca/api_handler.dart';
 import 'package:praca/main.dart';
 import 'package:praca/screens/qr_code_scanner.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-
-
-
-class EnterCodePage extends StatefulWidget{
+class EnterCodePage extends StatefulWidget {
   final String? code; // Make code parameter optional
   EnterCodePage({this.code});
   @override
@@ -20,6 +18,7 @@ class _EnterCodePageState extends State<EnterCodePage> {
   User? _user = FirebaseAuth.instance.currentUser;
   String? _responseMessage;
   String? _username;
+  Map<String, LatLng>? _gpsPoints;
 
   @override
   void initState() {
@@ -28,6 +27,21 @@ class _EnterCodePageState extends State<EnterCodePage> {
       _codeController.text = widget.code!; // Prefill with QR code if available
     }
     _username = _user?.email;
+    _fetchGpsPoints(); // Fetch GPS points on initialization
+  }
+
+  Future<void> _fetchGpsPoints() async {
+    try {
+      final points = await _apiService.getAllGpsPoints();
+      setState(() {
+        _gpsPoints = points;
+      });
+    } catch (e) {
+      print('Error fetching GPS points: $e');
+      setState(() {
+        _gpsPoints = {};
+      });
+    }
   }
 
   Future<void> callApi(String code) async {
@@ -67,7 +81,7 @@ class _EnterCodePageState extends State<EnterCodePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
+      appBar: AppBar(
         title: Text('Enter Code'),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
@@ -83,15 +97,15 @@ class _EnterCodePageState extends State<EnterCodePage> {
           children: [
             SizedBox(height: 30),
             TextField(
-                controller: _codeController,
-                decoration: InputDecoration(
-                  labelText: 'Truck QR Code or Manual Entry',
-                  suffixIcon: IconButton(
-                    icon: Icon(Icons.qr_code_scanner),
-                    onPressed: _scanQRCode, // Open QR scanner if needed
-                  ),
+              controller: _codeController,
+              decoration: InputDecoration(
+                labelText: 'Truck QR Code or Manual Entry',
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.qr_code_scanner),
+                  onPressed: _scanQRCode, // Open QR scanner if needed
                 ),
               ),
+            ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
@@ -106,15 +120,30 @@ class _EnterCodePageState extends State<EnterCodePage> {
                     context,
                     MaterialPageRoute(builder: (context) => HomePage()),
                     ModalRoute.withName('/'),
-                  ).then((value) => setState(() {
-                  }));
+                  ).then((value) => setState(() {}));
                 }
               },
               child: Text('Submit'),
             ),
             SizedBox(height: 20),
-            if (_responseMessage != null)
-              Text('Response: $_responseMessage'),
+            if (_responseMessage != null) Text('Response: $_responseMessage'),
+            Expanded(
+              child: _gpsPoints == null
+                  ? Center(child: CircularProgressIndicator())
+                  : _gpsPoints!.isEmpty
+                      ? Center(child: Text('No GPS points available'))
+                      : ListView.builder(
+                          itemCount: _gpsPoints!.length,
+                          itemBuilder: (context, index) {
+                            String name = _gpsPoints!.keys.elementAt(index);
+                            LatLng location = _gpsPoints![name]!;
+                            return ListTile(
+                              title: Text(name),
+                              subtitle: Text('Lat: ${location.latitude}, Long: ${location.longitude}'),
+                            );
+                          },
+                        ),
+            ),
           ],
         ),
       ),
