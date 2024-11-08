@@ -18,9 +18,33 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Auth Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+      title: 'Dark Theme App',
+      themeMode: ThemeMode.dark, // Set to dark mode by default
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        primaryColor: Colors.grey, // Primary color is grey
+        hintColor: Colors.red, // Accent color is red
+        scaffoldBackgroundColor: Colors.black, // Background color for a dark look
+        appBarTheme: AppBarTheme(
+          color: Colors.grey[900], // Darker grey for the AppBar
+        ),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          backgroundColor: Colors.grey[900], // Background color for the bottom navigation bar
+          selectedItemColor: Colors.red, // Color for the selected item
+          unselectedItemColor: Colors.grey[400], // Color for unselected items
+        ),
+        buttonTheme: ButtonThemeData(
+          buttonColor: Colors.red, // Buttons with red color
+          textTheme: ButtonTextTheme.primary,
+        ),
+        textTheme: TextTheme(
+          bodyLarge: TextStyle(color: Colors.white), // Default text color for readability
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red, // Elevated button color
+          ),
+        ),
       ),
       home: HomePage(),
     );

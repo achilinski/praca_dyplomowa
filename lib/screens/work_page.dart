@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:praca/api_handler.dart';
 import 'package:praca/main.dart';
@@ -26,6 +27,7 @@ class _WorkPageState extends State<WorkPage> {
   bool _isBreak = false;
   String? _username;
   double _todayHours = 0;
+  LatLng? _currentPosition;
 
   Future<void> _fetchworkingStatus() async {
     String? _username = _user?.email;
@@ -68,7 +70,33 @@ class _WorkPageState extends State<WorkPage> {
     super.initState();
     _fetchworkingStatus();
     _username = _user?.email;
+    _getCurrentLocation();
   }
+
+  Future<void> _getCurrentLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if(!serviceEnabled){
+      print('Location service are disabled');
+      return;
+    }
+    permission = await Geolocator.checkPermission();
+    if(permission == LocationPermission.denied){
+      permission = await Geolocator.requestPermission();
+      if(permission == LocationPermission.denied){
+        print("denied");
+      }
+    }
+
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    setState(() {
+      _currentPosition = LatLng(position.latitude, position.longitude);
+    });
+
+  }
+
 
   Future<void> callApi(String code) async {
     final email = _user?.email;
@@ -104,6 +132,8 @@ class _WorkPageState extends State<WorkPage> {
     }
   }
 
+  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -119,7 +149,7 @@ class _WorkPageState extends State<WorkPage> {
                     width: double.infinity,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
-                      color: Colors.lightBlueAccent,
+                      color: Colors.grey[900],
                     ),
                     child: Column(
                       children: [
@@ -140,13 +170,13 @@ class _WorkPageState extends State<WorkPage> {
                   onPressed: () {
                     if (_isWorking) {
                       // Navigate to StopWorkScreen if working
-                      Navigator.pushReplacement(
+                      Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => StopWorkScreen()),
                       );
                     } else {
                       // Navigate to StartWorkScreen (or another screen) if not working
-                      Navigator.pushReplacement(
+                      Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => EnterCodePage()),
                       );
@@ -155,6 +185,8 @@ class _WorkPageState extends State<WorkPage> {
                   style: ElevatedButton.styleFrom(
                     minimumSize: Size(140, 50),
                     backgroundColor: _isWorking ? Colors.redAccent : Colors.green,
+                    foregroundColor: Colors.white,
+                    textStyle:TextStyle(color: Colors.white)
                   ),
                   child: Text(_isWorking ? 'Stop Work' : 'Start Work'),),
                 ElevatedButton(
@@ -173,17 +205,25 @@ class _WorkPageState extends State<WorkPage> {
                   },
                   style: ElevatedButton.styleFrom(
                     minimumSize: Size(140, 50),
-                    backgroundColor: Colors.orangeAccent
+                    backgroundColor: Colors.grey[900],
+                    foregroundColor: Colors.white,
+                    textStyle:TextStyle(color: Colors.white)
                   ), 
                   child: Text(_isBreak ? 'Stop Break' : 'Take Break'),),
               ],
               ),
               SizedBox(height: 10,),
               Expanded(
-              child: GoogleMap(
-                initialCameraPosition: CameraPosition(target: LatLng(20.0, 20.0)),
-              ),
-            ),
+            child: _currentPosition == null
+                ? Center(child: CircularProgressIndicator()) // Show a loading indicator if location is not ready
+                : GoogleMap(
+                    initialCameraPosition: CameraPosition(
+                      target: _currentPosition!,
+                      zoom: 14, // Adjust zoom level as needed
+                    ),
+                    myLocationEnabled: true,
+                  ),
+          ),
           ],
         ),
       ),
