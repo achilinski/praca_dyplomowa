@@ -2,6 +2,20 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- Permission while running on backgroud -->
+    <key>UIBackgroundModes</key>
+    <string>location</string>        <!-- Permission options for the `location` group -->
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Need location when in use</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>Always and when in use!</string>
+    <key>NSLocationUsageDescription</key>
+    <string>Older devices need location.</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>Can I have location always?</string>
+    <!-- Permission options for the `appTrackingTransparency` -->
+    <key>NSUserTrackingUsageDescription</key>
+    <string>appTrackingTransparency</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Sacn qr code</string>
 	<key>CFBundleDevelopmentRegion</key>

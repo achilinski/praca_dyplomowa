@@ -3,7 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  final String baseUrl = 'http://192.168.0.150:8000/'; // Replace with your Django API base URL
+  final String baseUrl = 'http://192.168.0.150:8000'; // Replace with your Django API base URL
 
   // Function to start a work shift
   Future<http.Response> startWorkShift(String username, String qrCode) async {

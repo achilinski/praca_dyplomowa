@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:praca/api_handler.dart';
+import 'package:praca/screens/chat_page.dart';
 import 'package:praca/screens/work_page.dart';
 import 'package:praca/screens/settings_page.dart';
 import 'package:praca/screens/stop_work_screen.dart';
+import 'package:web_socket_channel/io.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'screens/login_screen.dart';
@@ -133,7 +135,7 @@ class _HomePageState extends State<HomePage> {
       case 1:
         return 'Work Page';
       case 2:
-        return 'Settings';
+        return 'Chat';
       default:
         return 'Flutter Auth Demo';
     }
@@ -191,7 +193,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         WorkPage(),
-        SettingsPage(),
+        ChatPage(channel: IOWebSocketChannel.connect('ws://192.168.0.150:8000/ws/chat/room1/')),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
