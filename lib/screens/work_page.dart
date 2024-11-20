@@ -7,11 +7,14 @@ import 'package:praca/main.dart';
 import 'package:praca/screens/enter_code_page.dart';
 import 'package:praca/screens/qr_code_scanner.dart';
 import 'package:praca/screens/stop_work_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 
 class WorkPage extends StatefulWidget {
   //final String? code; // Make code parameter optional
   //WorkPage({Key? key, this.code}) : super(key: key);
+  final LatLng? firstPoint;
+  WorkPage({this.firstPoint});
   @override
   _WorkPageState createState() => _WorkPageState();
 }
@@ -62,6 +65,17 @@ class _WorkPageState extends State<WorkPage> {
           _todayHours = _todayHours;
         });
       }
+    }
+  }
+
+  void _openGoogleMaps(LatLng destination) async {
+    final Uri googleMapsUri = Uri.parse(
+        'https://www.google.com/maps/dir/?api=1&destination=${destination.latitude},${destination.longitude}&travelmode=driving');
+
+    if (await canLaunchUrl(googleMapsUri)) {
+      await launchUrl(googleMapsUri, mode: LaunchMode.externalApplication);
+    } else {
+      throw 'Could not open Google Maps.';
     }
   }
 
@@ -214,16 +228,61 @@ class _WorkPageState extends State<WorkPage> {
               ),
               SizedBox(height: 10,),
               Expanded(
-            child: _currentPosition == null
-                ? Center(child: CircularProgressIndicator()) // Show a loading indicator if location is not ready
-                : GoogleMap(
-                    initialCameraPosition: CameraPosition(
-                      target: _currentPosition!,
-                      zoom: 14, // Adjust zoom level as needed
-                    ),
-                    myLocationEnabled: true,
-                  ),
-          ),
+                child: _currentPosition == null
+                    ? Center(child: CircularProgressIndicator())
+                    : GoogleMap(
+                        initialCameraPosition: CameraPosition(
+                          target: _currentPosition!,
+                          zoom: 14, // Default zoom level
+                        ),
+                        myLocationEnabled: true,
+                        markers: {
+                          if (widget.firstPoint != null)
+                            Marker(
+                              markerId: MarkerId('firstPoint'),
+                              position: widget.firstPoint!,
+                              infoWindow: InfoWindow(
+                                title: 'Destination',
+                                snippet: 'Tap to navigate',
+                                onTap: () {
+                                  _openGoogleMaps(widget.firstPoint!);
+                                },
+                              ),
+                            ),
+                        },
+                        onMapCreated: (GoogleMapController controller) {
+                          if (_currentPosition != null && widget.firstPoint != null) {
+                            // Adjust the camera to include both points
+                            LatLngBounds bounds = LatLngBounds(
+                              southwest: LatLng(
+                                _currentPosition!.latitude < widget.firstPoint!.latitude
+                                    ? _currentPosition!.latitude
+                                    : widget.firstPoint!.latitude,
+                                _currentPosition!.longitude < widget.firstPoint!.longitude
+                                    ? _currentPosition!.longitude
+                                    : widget.firstPoint!.longitude,
+                              ),
+                              northeast: LatLng(
+                                _currentPosition!.latitude > widget.firstPoint!.latitude
+                                    ? _currentPosition!.latitude
+                                    : widget.firstPoint!.latitude,
+                                _currentPosition!.longitude > widget.firstPoint!.longitude
+                                    ? _currentPosition!.longitude
+                                    : widget.firstPoint!.longitude,
+                              ),
+                            );
+
+                            controller.animateCamera(
+                              CameraUpdate.newLatLngBounds(bounds, 50),
+                            );
+                          } else if (_currentPosition != null) {
+                            controller.animateCamera(
+                              CameraUpdate.newLatLng(_currentPosition!),
+                            );
+                          }
+                        },
+                      ),
+              ),
           ],
         ),
       ),

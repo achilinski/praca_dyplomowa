@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:praca/api_handler.dart';
 import 'package:praca/screens/chat_page.dart';
 import 'package:praca/screens/work_page.dart';
@@ -55,6 +56,8 @@ class MyApp extends StatelessWidget {
 
 class HomePage extends StatefulWidget {
   @override
+  final LatLng? firstPoint;
+  HomePage({this.firstPoint});
   _HomePageState createState() => _HomePageState();
 }
 
@@ -131,13 +134,11 @@ class _HomePageState extends State<HomePage> {
   String _getTitle() {
     switch (_selectedIndex) {
       case 0:
-        return 'Home';
-      case 1:
         return 'Work Page';
-      case 2:
-        return 'Chat';
+      case 1:
+        return 'work';
       default:
-        return 'Flutter Auth Demo';
+        return 'chat';
     }
   }
 
@@ -159,40 +160,7 @@ class _HomePageState extends State<HomePage> {
           });
         },
         children: [
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      Text(
-                        '$_totalHours hours',
-                        style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Today: $_todayHours hours',
-                        style: TextStyle(fontSize: 18, color: Colors.grey[700]),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Center(
-                    child: Text(
-                      _user != null
-                          ? 'You are logged in as ${_user!.email}'
-                          : 'Please sign in or register.',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        WorkPage(),
+        WorkPage(firstPoint:widget.firstPoint),
         ChatPage(channel: IOWebSocketChannel.connect('ws://192.168.0.150:8000/ws/chat/room1/')),
         ],
       ),
@@ -203,12 +171,8 @@ class _HomePageState extends State<HomePage> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.play_arrow),
-            label: 'Work',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: Icon(Icons.chat_bubble),
+            label: 'Chat',
           ),
         ],
         currentIndex: _selectedIndex,

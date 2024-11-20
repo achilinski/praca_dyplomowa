@@ -11,7 +11,7 @@ class ApiService {
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'username': username, 'qr_code': qrCode}),
+      body: jsonEncode({'username': username, 'truck_qr': qrCode}),
     );
     return response;
   }
@@ -22,7 +22,7 @@ class ApiService {
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'username': username, 'qr_code': qrCode}),
+      body: jsonEncode({'username': username, 'truck_qr': qrCode}),
     );
     return response;
   }
@@ -75,8 +75,14 @@ class ApiService {
   // Function to get truck details by QR code
   Future<http.Response> getTruckByQr(String qrCode) async {
     final url = Uri.parse('$baseUrl/api/truck/get-qr/');
-    final response = await http.get(url);
+    //final response = await http.get(url);
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'qr_code': qrCode}),
+    );
     return response;
+    //return response;
   }
 
   // Function to get all trucks

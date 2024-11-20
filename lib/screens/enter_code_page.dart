@@ -93,7 +93,6 @@ class _EnterCodePageState extends State<EnterCodePage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             SizedBox(height: 30),
             TextField(
@@ -105,25 +104,6 @@ class _EnterCodePageState extends State<EnterCodePage> {
                   onPressed: _scanQRCode, // Open QR scanner if needed
                 ),
               ),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                final code = _codeController.text;
-                if (code.isNotEmpty) {
-                  await callApi(code);
-                }
-
-                // Navigate if work started successfully
-                if (_responseMessage == 'Work started') {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => HomePage()),
-                    ModalRoute.withName('/'),
-                  ).then((value) => setState(() {}));
-                }
-              },
-              child: Text('Submit'),
             ),
             SizedBox(height: 20),
             if (_responseMessage != null) Text('Response: $_responseMessage'),
@@ -138,6 +118,7 @@ class _EnterCodePageState extends State<EnterCodePage> {
                             String name = _gpsPoints!.keys.elementAt(index);
                             LatLng location = _gpsPoints![name]!;
                             return ListTile(
+                              leading: Text('${index + 1}.', style: TextStyle(fontSize: 15),),
                               title: Text(name),
                               subtitle: Text('Lat: ${location.latitude}, Long: ${location.longitude}'),
                             );
@@ -145,6 +126,31 @@ class _EnterCodePageState extends State<EnterCodePage> {
                         ),
             ),
           ],
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ElevatedButton(
+          onPressed: () async {
+            final code = _codeController.text;
+            if (code.isNotEmpty) {
+              await callApi(code);
+            }
+
+            // Navigate if work started successfully
+            if (_responseMessage == 'Work started') {
+              LatLng firstPoint = _gpsPoints!.values.first;
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => HomePage(firstPoint:firstPoint)),
+                ModalRoute.withName('/'),
+              ).then((value) => setState(() {}));
+            }
+          },
+          child: Text('Submit'),
+          style: ElevatedButton.styleFrom(
+            minimumSize: Size(double.infinity, 50), // Full-width button
+          ),
         ),
       ),
     );
