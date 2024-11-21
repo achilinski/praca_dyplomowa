@@ -3,7 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  final String baseUrl = 'http://192.168.0.150:8000'; // Replace with your Django API base URL
+  final String baseUrl = 'http://192.168.191.195:8000'; // Replace with your Django API base URL
 
   // Function to start a work shift
   Future<http.Response> startWorkShift(String username, String qrCode) async {
@@ -108,7 +108,7 @@ class ApiService {
     return hoursResponseTime;
   }
 
-  Future<double> getUserTodayStats(String username) async {
+  Future<String> getUserTodayStats(String username) async {
     final url = Uri.parse('$baseUrl/api/shift/today/');
     final response = await http.post(
       url,
@@ -116,11 +116,15 @@ class ApiService {
       body: jsonEncode({'username': username}),
     );
 
-    // Decode the JSON response and extract the double value
+    // Decode the JSON response and calculate hours and minutes
     List<dynamic> responseData = jsonDecode(response.body);
-    double responseTime = responseData[0];
-    double hoursResponseTime = responseTime / 60;
-    return hoursResponseTime;
+    double responseTimeInSeconds = responseData[0];
+    int totalMinutes = (responseTimeInSeconds / 60).round();
+    int hours = totalMinutes ~/ 60;
+    int minutes = totalMinutes % 60;
+
+    // Return the formatted time as a string
+    return '${hours.toString().padLeft(1, '0')}:${minutes.toString().padLeft(2, '0')}';
   }
 
   Future<http.Response> startBreak(String username) async {

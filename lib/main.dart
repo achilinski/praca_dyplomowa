@@ -114,7 +114,7 @@ class _HomePageState extends State<HomePage> {
 
     if (_username != null) {
       _totalHours = await ApiService().getUserMonthStats(_username!);
-      _todayHours = await ApiService().getUserTodayStats(_username!);
+      _todayHours = 0;
 
       setState(() {
         _totalHours = _totalHours;
@@ -161,7 +161,7 @@ class _HomePageState extends State<HomePage> {
         },
         children: [
         WorkPage(firstPoint:widget.firstPoint),
-        ChatPage(channel: IOWebSocketChannel.connect('ws://192.168.0.150:8000/ws/chat/room1/')),
+        ChatPage(channel: IOWebSocketChannel.connect('ws://192.168.191.195:8000/ws/chat/room1/')),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(

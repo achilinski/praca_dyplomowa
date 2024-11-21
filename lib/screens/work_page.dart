@@ -29,7 +29,7 @@ class _WorkPageState extends State<WorkPage> {
   bool _isWorking = false;
   bool _isBreak = false;
   String? _username;
-  double _todayHours = 0;
+  //String _todayHours = '0:00';
   LatLng? _currentPosition;
 
   Future<void> _fetchworkingStatus() async {
@@ -53,16 +53,27 @@ class _WorkPageState extends State<WorkPage> {
     }
   }
 
+  Future<void> _fetchBreakStatus() async{
+    if (_isWorking){
+      bool breakStatus = await ApiService().isBreak(_username!);
+      if (mounted) {
+        setState(() {
+          _isBreak = breakStatus;
+        });
+      }
+    }
+  }
+
   Future<void> _fetchUserStats() async {
     User? user = FirebaseAuth.instance.currentUser;
     _username = user?.email;
 
     if (_username != null) {
-      _todayHours = await ApiService().getUserTodayStats(_username!);
+      String formattedTime = await ApiService().getUserTodayStats(_username!);
 
-      if(mounted){
+      if (mounted) {
         setState(() {
-          _todayHours = _todayHours;
+          _responseMessage = formattedTime; // Store the formatted time
         });
       }
     }
@@ -83,6 +94,7 @@ class _WorkPageState extends State<WorkPage> {
   void initState() {
     super.initState();
     _fetchworkingStatus();
+    _fetchUserStats();
     _username = _user?.email;
     _getCurrentLocation();
   }
@@ -169,8 +181,8 @@ class _WorkPageState extends State<WorkPage> {
                       children: [
                         SizedBox(height: 8),
                         Text(
-                          '$_todayHours hours',
-                          style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold)
+                          _responseMessage ?? '0:00',
+                          style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -204,18 +216,13 @@ class _WorkPageState extends State<WorkPage> {
                   ),
                   child: Text(_isWorking ? 'Stop Work' : 'Start Work'),),
                 ElevatedButton(
-                  onPressed: (){
+                  onPressed: () async {
                     if(_isBreak){
-                      ApiService().stopBreak(_username!);
-                      setState(() {
-                        _isBreak = false;
-                      });
+                      await ApiService().stopBreak(_username!);
                     } else {
-                      ApiService().startBreak(_username!);
-                      setState(() {
-                        _isBreak = true;
-                      });
+                      await ApiService().startBreak(_username!);
                     }
+                    _fetchBreakStatus();
                   },
                   style: ElevatedButton.styleFrom(
                     minimumSize: Size(140, 50),
